@@ -1,26 +1,37 @@
 const fs = require('fs');
 const path = require('path');
+const myPath = path.join(__dirname, 'secret-folder');
 
 let myFun = () => {
-  try {
-    let myPath = path.resolve('secret-folder');
-    fs.readdir(myPath,  { withFileTypes: true }, function(err, items) {
-     
-      for (let i=0; i<items.length; i++) {
-          
-        let pathsToCheck = path.resolve('secret-folder', items[i].name);
+  fs.readdir(myPath, function (err, items) {
+    if (err) {
+      console.log('Error', err.message);
+      return;
+    }
 
-        fs.stat(pathsToCheck, (err, stats) => {
-          if(!stats.isDirectory()) {
-            let inn = items[i].name.split('.');
-            console.log(inn[0], path.extname(items[i].name), stats.size);
+    for (const item of items) {
+      console.log(item);
+      let pathsToCheck = path.join(myPath, item);
+
+      fs.stat(pathsToCheck, (err, stats) => {
+        if (err) {
+          console.log('Error', err.message);
+          return;
+        }
+
+        if (stats.isFile()) {
+          let fileObj = path.parse(pathsToCheck);
+          let fileExt = fileObj.ext;
+          if (fileExt[0] === '.') {
+            console.log(fileObj.name, ' - ', fileExt.slice(1), ' - ', `${stats.size / 1000}kb`);
+          } else {
+            console.log(fileObj.name, ' - ', fileExt, ' - ', `${stats.size / 1000}kb`);
           }
-        });
+        }
       }
-    });
-  } catch (err) {
-    console.error(err);
-  }
+      );
+    }
+  });
 };
 
 myFun();

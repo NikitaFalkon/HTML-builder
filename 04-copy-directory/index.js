@@ -2,35 +2,43 @@ const fs = require('fs');
 const path = require('path');
 
 let myFun = () => {
-  try {
-    let myPath = path.resolve('files');
+    const myPath = path.join(__dirname, 'files');
 
-    fs.mkdir(path.join(__dirname, 'filesCopy'),
-      { recursive: true }, (err) => {
+    fs.mkdir(path.join(__dirname, 'filesCopy'), (err) => {
+      
         if (err) {
-          return console.error(err);
+          console.log('Error', err.message);
+          return;
         }
+          
         console.log('Directory created successfully!');
       });
     
 
-    fs.readdir(myPath,  { withFileTypes: true }, function(err, items) {
-      for (let i=0; i<items.length; i++) {
-        fs.open('filesCopy/' + items[i].name, 'w', (err) => {
-          if(err) throw err;
+    fs.readdir(myPath,   function(err, items) {
+      for (const item of items) {
+        if (err) {
+          console.log('Error', err.message);
+          return;
+        }
+
+        let pathToFile = path.join(myPath, item);
+        let pathToCopyFile = path.join(path.join(__dirname, 'filesCopy'), item);
+
+        fs.open(pathToCopyFile, 'w', (err) => {
+          if (err) {
+            console.log('Error', err.message);
+            return;
+          }
         });
 
-        fs.copyFile('files/' + items[i].name, 'filesCopy/' + items[i].name, (err) => {
+        fs.copyFile(pathToFile, pathToCopyFile, (err) => {
           if (err) {
             console.log('Error Found:', err);
           }
         });  
       }
     });
-  }
-  catch (err) {
-    console.error(err);
-  }
 };
 
 myFun();

@@ -6,21 +6,29 @@ let mass = [];
 
 let myFun = function () {
 
-  try {
+    const myPath = path.join(__dirname, 'styles');
 
-    let myPath = path.resolve('styles');
+    fs.readdir(myPath,  function(err, items) {
 
-    fs.readdir(myPath,  { withFileTypes: true }, function(err, items) {
+      if (err) {
+        console.log('Error', err.message);
+        return;
+      }
 
-      for (let i = 0; i < items.length; i++) {
+      for (const item of items) {
 
-        let pathsToCheck = path.resolve('styles', items[i].name);
+        const pathsToCheck = path.join(myPath, item);
 
         fs.stat(pathsToCheck, (err, stats) => {
-          if(!stats.isDirectory() && path.extname(items[i].name) === '.css') {
+          if (err) {
+            console.log('Error', err.message);
+            return;
+          }
+
+          if(!stats.isDirectory() && path.extname(item.name) === '.css') {
             let  streamFile = fs.createReadStream(pathsToCheck,'utf8');
             streamFile.on('data', function (chunk) {
-            fileToWrite.write(chunk);
+              fileToWrite.write(chunk);
             });
           }
         });
@@ -42,11 +50,6 @@ let myFun = function () {
     // fs.writeFile(pathing, mass[0], function(error){
     //   if(error) throw error;
     // });
-
-  }
-  catch (err) {
-    console.error(err);
-  }
 };
 
 myFun();
